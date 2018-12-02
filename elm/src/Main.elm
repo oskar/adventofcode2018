@@ -2,6 +2,7 @@ module Main exposing (main)
 
 import Browser
 import Day01
+import Day02
 import Dict exposing (Dict)
 import Html exposing (button, div, h4, span, text, textarea)
 import Html.Attributes as Attrib
@@ -42,6 +43,7 @@ problemSolvers : ProblemSolvers
 problemSolvers =
     Dict.fromList
         [ ( 1, ( "+3\n+3\n4\n-2\n-4", Day01.solveProblem1, Day01.solveProblem2 ) )
+        , ( 2, ( "abcde\nfghij\nklmno\npqrst\nfguij\naxcye\nwvxyz", Day02.solveProblem1, Day02.solveProblem2 ) )
         ]
 
 
