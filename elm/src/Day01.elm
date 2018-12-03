@@ -1,6 +1,6 @@
 module Day01 exposing (solvers)
 
-import Answer exposing (..)
+import Answer exposing (Answer, ProblemSolver)
 import Array exposing (Array)
 import Set
 
@@ -48,7 +48,7 @@ solveProblem1 : ProblemSolver
 solveProblem1 input =
     parse input
         |> resultingFrequency
-        |> toIntAnswer
+        |> Answer.fromInt
 
 
 solveProblem2 : ProblemSolver
@@ -56,7 +56,7 @@ solveProblem2 input =
     parse input
         |> Array.fromList
         |> findFirstDuplicateFrequency
-        |> toIntAnswer
+        |> Answer.fromInt
 
 
 solvers =

@@ -1,6 +1,6 @@
 module Day02 exposing (solvers)
 
-import Answer exposing (..)
+import Answer exposing (Answer, ProblemSolver)
 import Dict
 
 
@@ -90,7 +90,7 @@ solveProblem1 input =
         checksum =
             nbOfTwos * nbOfThrees
     in
-    checksum |> toIntAnswer
+    checksum |> Answer.fromInt
 
 
 solveProblem2 : String -> Answer
@@ -103,9 +103,10 @@ solveProblem2 input =
             ids
                 |> offByOne
                 |> commonLetters
-                |> Maybe.withDefault "???"
     in
-    fabricId |> toStringAnswer
+    fabricId
+        |> Maybe.map Answer.fromString
+        |> Maybe.withDefault Answer.nope
 
 
 solvers =
