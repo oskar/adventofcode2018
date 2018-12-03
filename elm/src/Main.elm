@@ -1,5 +1,6 @@
 module Main exposing (main)
 
+import Answer exposing (ProblemSolver)
 import Browser
 import Day01
 import Day02
@@ -7,7 +8,6 @@ import Dict exposing (Dict)
 import Html exposing (button, div, h4, span, text, textarea)
 import Html.Attributes as Attrib
 import Html.Events exposing (onClick, onInput)
-import Solver exposing (Answer, Input, Solver)
 
 
 type alias DayNumber =
@@ -15,15 +15,15 @@ type alias DayNumber =
 
 
 type alias Day =
-    { input : Input
-    , answer1 : Answer
-    , answer2 : Answer
+    { input : String
+    , answer1 : String
+    , answer2 : String
     }
 
 
-type Problem
-    = Problem1
-    | Problem2
+type ProblemPart
+    = ProblemPart1
+    | ProblemPart2
 
 
 type alias Model =
@@ -31,19 +31,19 @@ type alias Model =
 
 
 type Msg
-    = SetDayInput DayNumber Input
-    | SolveProblem DayNumber Problem
+    = SetDayInput DayNumber String
+    | SolveProblem DayNumber ProblemPart
 
 
 type alias ProblemSolvers =
-    Dict DayNumber ( Input, Solver, Solver )
+    Dict DayNumber ( ProblemSolver, ProblemSolver )
 
 
-problemSolvers : ProblemSolvers
+problemSolvers : Dict Int ( ProblemSolver, ProblemSolver )
 problemSolvers =
     Dict.fromList
-        [ ( 1, ( "+3\n+3\n4\n-2\n-4", Day01.solveProblem1, Day01.solveProblem2 ) )
-        , ( 2, ( "abcde\nfghij\nklmno\npqrst\nfguij\naxcye\nwvxyz", Day02.solveProblem1, Day02.solveProblem2 ) )
+        [ ( 1, Day01.solvers )
+        , ( 2, Day02.solvers )
         ]
 
 
@@ -51,40 +51,46 @@ toModel : ProblemSolvers -> Model
 toModel solvers =
     solvers
         |> Dict.map
-            (\_ ( input, _, _ ) ->
-                { input = input, answer1 = "", answer2 = "" }
+            (\_ ( _, _ ) ->
+                { input = ""
+                , answer1 = ""
+                , answer2 = ""
+                }
             )
 
 
-setDayInput : Input -> Day -> Day
+setDayInput : String -> Day -> Day
 setDayInput input day =
-    { input = input, answer1 = "", answer2 = "" }
+    { input = input
+    , answer1 = ""
+    , answer2 = ""
+    }
 
 
-setDayAnswer : Answer -> Problem -> Day -> Day
-setDayAnswer answer problem day =
-    case problem of
-        Problem1 ->
+setDayAnswer : String -> ProblemPart -> Day -> Day
+setDayAnswer answer problemPart day =
+    case problemPart of
+        ProblemPart1 ->
             { day | answer1 = answer }
 
-        Problem2 ->
+        ProblemPart2 ->
             { day | answer2 = answer }
 
 
-solveDay : Solver -> Problem -> Day -> Day
-solveDay solver problem day =
-    setDayAnswer (solver day.input) problem day
+solveDay : ProblemSolver -> ProblemPart -> Day -> Day
+solveDay solver problemPart day =
+    setDayAnswer (solver day.input |> Answer.toString) problemPart day
 
 
-solverFromDayNumberAndProblem : DayNumber -> Problem -> Maybe Solver
-solverFromDayNumberAndProblem dayNumber problem =
+solverFromDayNumberAndProblem : DayNumber -> ProblemPart -> Maybe ProblemSolver
+solverFromDayNumberAndProblem dayNumber problemPart =
     let
-        solverByProblem ( _, solveProblem1, solveProblem2 ) =
-            if problem == Problem1 then
-                solveProblem1
+        solverByProblem ( problem1, problem2 ) =
+            if problemPart == ProblemPart1 then
+                problem1
 
             else
-                solveProblem2
+                problem2
     in
     Dict.get dayNumber problemSolvers
         |> Maybe.map solverByProblem
@@ -154,7 +160,7 @@ viewDay ( dayNumber, day ) =
         , div []
             [ button
                 [ Attrib.disabled (not hasAnyInput)
-                , onClick (SolveProblem dayNumber Problem1)
+                , onClick (SolveProblem dayNumber ProblemPart1)
                 ]
                 [ text "Solve 1" ]
             , span []
@@ -163,7 +169,7 @@ viewDay ( dayNumber, day ) =
         , div []
             [ button
                 [ Attrib.disabled (not hasAnyInput)
-                , onClick (SolveProblem dayNumber Problem2)
+                , onClick (SolveProblem dayNumber ProblemPart2)
                 ]
                 [ text "Solve 2" ]
             , span []

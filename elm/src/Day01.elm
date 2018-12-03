@@ -1,19 +1,19 @@
-module Day01 exposing (solveProblem1, solveProblem2)
+module Day01 exposing (solvers)
 
+import Answer exposing (..)
 import Array exposing (Array)
 import Set
-import Solver exposing (Input, Solver)
 
 
-parse : Input -> List Int
+parse : String -> List Int
 parse input =
     String.split "\n" input
         |> List.map String.toInt
         |> List.filterMap identity
 
 
-resultingFrequence : List Int -> Int
-resultingFrequence freqs =
+resultingFrequency : List Int -> Int
+resultingFrequency freqs =
     List.sum freqs
 
 
@@ -44,16 +44,20 @@ findFirstDuplicateFrequency changes =
         findFirstDuplicateFrequencyHelper Set.empty 0 0
 
 
-solveProblem1 : Solver
+solveProblem1 : ProblemSolver
 solveProblem1 input =
     parse input
-        |> resultingFrequence
-        |> String.fromInt
+        |> resultingFrequency
+        |> toIntAnswer
 
 
-solveProblem2 : Solver
+solveProblem2 : ProblemSolver
 solveProblem2 input =
     parse input
         |> Array.fromList
         |> findFirstDuplicateFrequency
-        |> String.fromInt
+        |> toIntAnswer
+
+
+solvers =
+    ( solveProblem1, solveProblem2 )

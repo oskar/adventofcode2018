@@ -1,10 +1,10 @@
-module Day02 exposing (solveProblem1, solveProblem2)
+module Day02 exposing (solvers)
 
+import Answer exposing (..)
 import Dict
-import Solver exposing (Input, Solver)
 
 
-parse : Input -> List String
+parse : String -> List String
 parse input =
     String.split "\n" input
 
@@ -24,29 +24,6 @@ hasExactlyN n str =
         |> List.foldl (\ch dict -> Dict.update ch updateSeen dict) Dict.empty
         |> Dict.values
         |> List.member n
-
-
-solveProblem1 : Solver
-solveProblem1 input =
-    let
-        lines =
-            input |> parse
-
-        nbOfTwos =
-            lines
-                |> List.filter (hasExactlyN 2)
-                |> List.length
-
-        nbOfThrees =
-            lines
-                |> List.filter (hasExactlyN 3)
-                |> List.length
-
-        checksum =
-            nbOfTwos * nbOfThrees
-    in
-    checksum
-        |> String.fromInt
 
 
 diff : String -> String -> String
@@ -94,7 +71,29 @@ offByOne ids =
     List.filter isOffByOne ids
 
 
-solveProblem2 : Solver
+solveProblem1 : String -> Answer
+solveProblem1 input =
+    let
+        lines =
+            input |> parse
+
+        nbOfTwos =
+            lines
+                |> List.filter (hasExactlyN 2)
+                |> List.length
+
+        nbOfThrees =
+            lines
+                |> List.filter (hasExactlyN 3)
+                |> List.length
+
+        checksum =
+            nbOfTwos * nbOfThrees
+    in
+    checksum |> toIntAnswer
+
+
+solveProblem2 : String -> Answer
 solveProblem2 input =
     let
         ids =
@@ -106,4 +105,8 @@ solveProblem2 input =
                 |> commonLetters
                 |> Maybe.withDefault "???"
     in
-    fabricId
+    fabricId |> toStringAnswer
+
+
+solvers =
+    ( solveProblem1, solveProblem2 )
