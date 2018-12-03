@@ -1,22 +1,32 @@
-module Answer exposing (Answer, ProblemSolver, toIntAnswer, toString, toStringAnswer)
+module Answer exposing (Answer, ProblemSolver, empty, fromInt, fromString, nope, toString)
 
 
 type Answer
     = StringAnswer String
     | IntAnswer Int
+    | NopeAnswer
+    | EmptyAnswer
 
 
 type alias ProblemSolver =
     String -> Answer
 
 
-toIntAnswer : Int -> Answer
-toIntAnswer int =
+nope =
+    NopeAnswer
+
+
+empty =
+    EmptyAnswer
+
+
+fromInt : Int -> Answer
+fromInt int =
     IntAnswer int
 
 
-toStringAnswer : String -> Answer
-toStringAnswer string =
+fromString : String -> Answer
+fromString string =
     StringAnswer string
 
 
@@ -28,3 +38,9 @@ toString answer =
 
         StringAnswer s ->
             s
+
+        NopeAnswer ->
+            "MISSING ANSWER 😞"
+
+        EmptyAnswer ->
+            ""

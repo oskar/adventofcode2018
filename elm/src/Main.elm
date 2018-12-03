@@ -1,6 +1,6 @@
 module Main exposing (main)
 
-import Answer exposing (ProblemSolver)
+import Answer exposing (Answer, ProblemSolver)
 import Browser
 import Day01
 import Day02
@@ -16,8 +16,8 @@ type alias DayNumber =
 
 type alias Day =
     { input : String
-    , answer1 : String
-    , answer2 : String
+    , answer1 : Answer
+    , answer2 : Answer
     }
 
 
@@ -53,8 +53,8 @@ toModel solvers =
         |> Dict.map
             (\_ ( _, _ ) ->
                 { input = ""
-                , answer1 = ""
-                , answer2 = ""
+                , answer1 = Answer.empty
+                , answer2 = Answer.empty
                 }
             )
 
@@ -62,12 +62,12 @@ toModel solvers =
 setDayInput : String -> Day -> Day
 setDayInput input day =
     { input = input
-    , answer1 = ""
-    , answer2 = ""
+    , answer1 = Answer.empty
+    , answer2 = Answer.empty
     }
 
 
-setDayAnswer : String -> ProblemPart -> Day -> Day
+setDayAnswer : Answer -> ProblemPart -> Day -> Day
 setDayAnswer answer problemPart day =
     case problemPart of
         ProblemPart1 ->
@@ -79,7 +79,7 @@ setDayAnswer answer problemPart day =
 
 solveDay : ProblemSolver -> ProblemPart -> Day -> Day
 solveDay solver problemPart day =
-    setDayAnswer (solver day.input |> Answer.toString) problemPart day
+    setDayAnswer (solver day.input) problemPart day
 
 
 solverFromDayNumberAndProblem : DayNumber -> ProblemPart -> Maybe ProblemSolver
@@ -112,7 +112,7 @@ update msg model =
 
                 Nothing ->
                     ( Dict.update dayNumber
-                        (Maybe.map (setDayAnswer "MISSING SOLVER" problem))
+                        (Maybe.map (setDayAnswer Answer.nope problem))
                         model
                     , Cmd.none
                     )
@@ -139,8 +139,8 @@ viewDay ( dayNumber, day ) =
             not (String.isEmpty day.input)
 
         answerText currentAnswer =
-            if not (String.isEmpty currentAnswer) then
-                currentAnswer
+            if currentAnswer /= Answer.empty then
+                Answer.toString currentAnswer
 
             else if hasAnyInput then
                 "Press solve"

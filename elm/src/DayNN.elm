@@ -1,16 +1,16 @@
 module DayNN exposing (solvers)
 
-import Answer exposing (..)
+import Answer exposing (Answer, ProblemSolver)
 
 
 solveProblem1 : ProblemSolver
 solveProblem1 input =
-    toStringAnswer "TODO"
+    Answer.nope
 
 
 solveProblem2 : ProblemSolver
 solveProblem2 input =
-    toStringAnswer "TODO"
+    Answer.nope
 
 
 solvers =
