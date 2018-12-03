@@ -4,6 +4,7 @@ import Answer exposing (Answer, ProblemSolver)
 import Browser
 import Day01
 import Day02
+import Day03
 import Dict exposing (Dict)
 import Html exposing (button, div, h4, span, text, textarea)
 import Html.Attributes as Attrib
@@ -44,6 +45,7 @@ problemSolvers =
     Dict.fromList
         [ ( 1, Day01.solvers )
         , ( 2, Day02.solvers )
+        , ( 3, Day03.solvers )
         ]
 
 
@@ -126,6 +128,7 @@ view model =
             []
             (model
                 |> Dict.toList
+                |> List.reverse
                 |> List.map viewDay
             )
         ]
