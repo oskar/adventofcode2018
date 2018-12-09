@@ -243,8 +243,15 @@ solveProblem1 input =
             Dict.get sleepyGuardId allGuardState
                 |> Maybe.andThen mostSleptMinuteFromGuardState
                 |> Maybe.withDefault 0
+
+        answer =
+            sleepyGuardId * mostSleptMinute
     in
-    Answer.fromInt (sleepyGuardId * mostSleptMinute)
+    if answer == 0 then
+        Answer.nope
+
+    else
+        Answer.fromInt answer
 
 
 solveProblem2 : ProblemSolver
