@@ -224,6 +224,19 @@ countMinutes minutes =
         |> List.foldl count Dict.empty
 
 
+mapMostSleptMinuteWithCount : ( GuardId, GuardState ) -> ( GuardId, ( Int, Int ) )
+mapMostSleptMinuteWithCount ( guardId, { sleptMinutes } ) =
+    ( guardId
+    , countMinutes sleptMinutes
+        |> Dict.toList
+        |> List.sortBy Tuple.second
+        |> List.reverse
+        |> List.head
+        -- ( Minute, Count )
+        |> Maybe.withDefault ( 0, 0 )
+    )
+
+
 solveProblem1 : ProblemSolver
 solveProblem1 input =
     let
@@ -256,7 +269,33 @@ solveProblem1 input =
 
 solveProblem2 : ProblemSolver
 solveProblem2 input =
-    Answer.nope
+    let
+        events =
+            P.run parserEvents input
+                |> Result.withDefault []
+                |> List.sortWith sortEventByTimestamp
+
+        allGuardState =
+            guardStateFromEvents Nothing events Dict.empty
+
+        ( guardId, ( minute, _ ) ) =
+            allGuardState
+                |> Dict.toList
+                |> List.map mapMostSleptMinuteWithCount
+                -- Sort by minute count
+                |> List.sortBy (Tuple.second >> Tuple.second)
+                |> List.reverse
+                |> List.head
+                |> Maybe.withDefault ( 0, ( 0, 0 ) )
+
+        answer =
+            guardId * minute
+    in
+    if answer == 0 then
+        Answer.nope
+
+    else
+        Answer.fromInt answer
 
 
 solvers =
