@@ -1,6 +1,7 @@
 module Day04 exposing (solvers)
 
 import Answer exposing (Answer, ProblemSolver)
+import Dict exposing (Dict)
 import Parser as P exposing ((|.), (|=), Parser)
 
 
@@ -16,6 +17,17 @@ type EventType
 
 type alias Timestamp =
     { year : Int, month : Int, day : Int, hour : Int, minute : Int }
+
+
+type alias GuardState =
+    { lastBeganShift : Timestamp
+    , lastWentToSleep : Timestamp
+    , sleptMinutes : List Int
+    }
+
+
+type alias GuardId =
+    Int
 
 
 parserEvents : Parser (List Event)
@@ -82,23 +94,134 @@ parserLeadingZeroInt =
         ]
 
 
-compare : Int -> Int -> Order -> Order
-compare a b whenSame =
-    if a < b then
-        LT
-
-    else if a > b then
-        GT
-
-    else
-        whenSame
-
-
 sortEventByTimestamp : Event -> Event -> Order
 sortEventByTimestamp a b =
+    let
+        compare : Int -> Int -> Order -> Order
+        compare first second whenSame =
+            if first < second then
+                LT
+
+            else if first > second then
+                GT
+
+            else
+                whenSame
+    in
     compare a.timestamp.year b.timestamp.year <|
         compare a.timestamp.month b.timestamp.month <|
-            compare a.timestamp.day b.timestamp.day EQ
+            compare a.timestamp.day b.timestamp.day <|
+                compare a.timestamp.hour b.timestamp.hour <|
+                    compare a.timestamp.minute b.timestamp.minute EQ
+
+
+zeroTimestamp : Timestamp
+zeroTimestamp =
+    Timestamp 0 1 1 0 0
+
+
+setGuardBeginsShift guardId timestamp maybeState =
+    case maybeState of
+        Just state ->
+            Just { state | lastBeganShift = timestamp }
+
+        Nothing ->
+            Just
+                { lastBeganShift = timestamp
+                , lastWentToSleep = zeroTimestamp
+                , sleptMinutes = []
+                }
+
+
+setGuardFallAsleep guardId timestamp maybeState =
+    case maybeState of
+        Just state ->
+            Just { state | lastWentToSleep = timestamp }
+
+        Nothing ->
+            Nothing
+
+
+setGuardWakesUp guardId timestamp maybeState =
+    case maybeState of
+        Just state ->
+            let
+                sleptMinutes =
+                    List.range state.lastWentToSleep.minute (timestamp.minute - 1)
+            in
+            Just { state | sleptMinutes = List.append state.sleptMinutes sleptMinutes }
+
+        Nothing ->
+            Nothing
+
+
+guardStateFromEvents : Maybe GuardId -> List Event -> Dict GuardId GuardState -> Dict GuardId GuardState
+guardStateFromEvents maybeGuardId events states =
+    case events of
+        [] ->
+            states
+
+        { action, timestamp } :: rest ->
+            case maybeGuardId of
+                Just guardId ->
+                    case action of
+                        GuardBeginsShift nextGuardId ->
+                            Dict.update nextGuardId (setGuardBeginsShift nextGuardId timestamp) states
+                                |> guardStateFromEvents (Just nextGuardId) rest
+
+                        WakesUp ->
+                            Dict.update guardId (setGuardWakesUp guardId timestamp) states
+                                |> guardStateFromEvents (Just guardId) rest
+
+                        FallsAsleep ->
+                            Dict.update guardId (setGuardFallAsleep guardId timestamp) states
+                                |> guardStateFromEvents (Just guardId) rest
+
+                Nothing ->
+                    case action of
+                        GuardBeginsShift nextGuardId ->
+                            guardStateFromEvents (Just nextGuardId) events states
+
+                        _ ->
+                            guardStateFromEvents maybeGuardId rest states
+
+
+sleptTheMostGuardId : Dict GuardId GuardState -> Maybe GuardId
+sleptTheMostGuardId guardState =
+    Dict.toList guardState
+        |> List.map (\( guardId, { sleptMinutes } ) -> ( guardId, List.length sleptMinutes ))
+        |> List.sortBy Tuple.second
+        |> List.map Tuple.first
+        |> List.reverse
+        |> List.head
+
+
+mostSleptMinuteFromGuardState : GuardState -> Maybe Int
+mostSleptMinuteFromGuardState guardState =
+    countMinutes guardState.sleptMinutes
+        |> Dict.toList
+        |> List.sortBy Tuple.second
+        |> List.map Tuple.first
+        |> List.reverse
+        |> List.head
+
+
+countMinutes : List Int -> Dict Int Int
+countMinutes minutes =
+    let
+        updateCount maybeMin =
+            case maybeMin of
+                Just min ->
+                    Just (min + 1)
+
+                Nothing ->
+                    Just 1
+
+        count min res =
+            Dict.update min updateCount res
+    in
+    minutes
+        |> List.foldl count Dict.empty
 
 
 solveProblem1 : ProblemSolver
@@ -109,10 +232,19 @@ solveProblem1 input =
                 |> Result.withDefault []
                 |> List.sortWith sortEventByTimestamp
 
-        _ =
-            Debug.log "events" events
+        allGuardState =
+            guardStateFromEvents Nothing events Dict.empty
+
+        sleepyGuardId =
+            sleptTheMostGuardId allGuardState
+                |> Maybe.withDefault 0
+
+        mostSleptMinute =
+            Dict.get sleepyGuardId allGuardState
+                |> Maybe.andThen mostSleptMinuteFromGuardState
+                |> Maybe.withDefault 0
     in
-    Answer.nope
+    Answer.fromInt (sleepyGuardId * mostSleptMinute)
 
 
 solveProblem2 : ProblemSolver
