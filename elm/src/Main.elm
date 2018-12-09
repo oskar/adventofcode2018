@@ -5,6 +5,7 @@ import Browser
 import Day01
 import Day02
 import Day03
+import Day04
 import Dict exposing (Dict)
 import Html exposing (button, div, h4, span, text, textarea)
 import Html.Attributes as Attrib
@@ -46,6 +47,7 @@ problemSolvers =
         [ ( 1, Day01.solvers )
         , ( 2, Day02.solvers )
         , ( 3, Day03.solvers )
+        , ( 4, Day04.solvers )
         ]
 
 
