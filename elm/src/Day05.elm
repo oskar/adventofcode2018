@@ -1,7 +1,7 @@
 module Day05 exposing (solvers)
 
 import Answer exposing (Answer, ProblemSolver)
-import Array exposing (Array)
+import Set
 
 
 isReacting : Char -> Char -> Bool
@@ -11,6 +11,11 @@ isReacting a b =
 
     else
         Char.toLower a == Char.toLower b
+
+
+isUnitOfType : Char -> Char -> Bool
+isUnitOfType unitType unit =
+    Char.toLower unitType == Char.toLower unit
 
 
 triggerReaction : List Char -> List Char -> List Char
@@ -47,7 +52,34 @@ solveProblem1 input =
 
 solveProblem2 : ProblemSolver
 solveProblem2 input =
-    Answer.nope
+    let
+        polymer =
+            input
+                |> String.trim
+                |> String.toList
+
+        uniqueUnits =
+            polymer
+                |> List.map Char.toLower
+                |> Set.fromList
+
+        maybeShortestLength =
+            uniqueUnits
+                |> Set.foldl
+                    (\unitToFilterOut lengths ->
+                        (polymer
+                            |> List.filter (not << isUnitOfType unitToFilterOut)
+                            |> triggerReaction []
+                            |> List.length
+                        )
+                            :: lengths
+                    )
+                    []
+                |> List.minimum
+    in
+    maybeShortestLength
+        |> Maybe.map Answer.fromInt
+        |> Maybe.withDefault Answer.nope
 
 
 solvers =
