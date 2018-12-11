@@ -6,6 +6,7 @@ import Day01
 import Day02
 import Day03
 import Day04
+import Day05
 import Dict exposing (Dict)
 import Html exposing (button, div, h4, span, text, textarea)
 import Html.Attributes as Attrib
@@ -48,6 +49,7 @@ problemSolvers =
         , ( 2, Day02.solvers )
         , ( 3, Day03.solvers )
         , ( 4, Day04.solvers )
+        , ( 5, Day05.solvers )
         ]
 
 
@@ -162,22 +164,22 @@ viewDay ( dayNumber, day ) =
             , Attrib.value day.input
             ]
             []
-        , div []
+        , div [ Attrib.style "display" "flex" ]
             [ button
                 [ Attrib.disabled (not hasAnyInput)
                 , onClick (SolveProblem dayNumber ProblemPart1)
                 ]
                 [ text "Solve 1" ]
-            , span []
+            , span [ Attrib.style "margin-left" "0.5rem" ]
                 [ text (answerText day.answer1) ]
             ]
-        , div []
+        , div [ Attrib.style "display" "flex" ]
             [ button
                 [ Attrib.disabled (not hasAnyInput)
                 , onClick (SolveProblem dayNumber ProblemPart2)
                 ]
                 [ text "Solve 2" ]
-            , span []
+            , span [ Attrib.style "margin-left" "0.5rem" ]
                 [ text (answerText day.answer2) ]
             ]
         ]
